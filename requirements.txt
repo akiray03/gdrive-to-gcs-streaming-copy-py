@@ -1,0 +1,5 @@
+google-auth==1.6.1
+google-api-python-client==1.7.4
+google-cloud-storage==1.13.0
+psutil==5.4.8
+humanize==0.5.1
