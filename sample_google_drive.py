@@ -1,6 +1,8 @@
 import os
 import sys
 import tempfile
+import base64
+import binascii
 
 import google_auth_httplib2
 from httplib2 import Http
@@ -98,6 +100,24 @@ def copy(drive_file_id, bucket_name, object_path):
 
     if not uploader.done:
         raise RuntimeError('Uploader is not finished.')
+
+    source_md5_checksum = metadata['md5Checksum']
+
+    storage_client = storage.Client()
+    bucket = storage_client.get_bucket(bucket_name)
+    dest_blob = bucket.get_blob(
+        blob_name=object_path,
+        client=storage_client,
+    )
+    print(dest_blob)
+    print(dest_blob.md5_hash)
+    gcs_md5 = str(binascii.b2a_hex(base64.b64decode(dest_blob.md5_hash)), 'utf-8')
+
+    if source_md5_checksum != gcs_md5:
+        raise RuntimeError('MD5 CheckSum is mismatched. (Google Drive: {}, GCS: {})'.format(
+            source_md5_checksum,
+            gcs_md5
+        ))
 
     print('copy finished.')
 
